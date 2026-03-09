@@ -99,9 +99,11 @@ export function PieChart({ categories, items }: PieProps) {
         <div className="chart-card">
             <div className="chart-title">Gastos por Categoria</div>
             <div className="chart-subtitle">Distribuição das saídas do mês</div>
-            <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
-                <canvas ref={canvasRef} style={{ flexShrink: 0 }} />
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 120 }}>
+            <div style={{ display: "flex", gap: 16, alignItems: "center", flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "center", flexShrink: 0 }}>
+                    <canvas ref={canvasRef} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, minWidth: 0 }}>
                     {data.slice(0, 8).map(d => {
                         const pct = total > 0 ? ((d.amount / total) * 100).toFixed(1) : "0";
                         return (
@@ -156,11 +158,12 @@ export function BarChart({ allTransactions, currentMonthKey }: BarProps) {
         const gridColor = getComputedCssVar("--chart-grid") || "rgba(255,255,255,.05)";
 
         const dpr = window.devicePixelRatio || 1;
-        const w = canvas.parentElement?.clientWidth ?? 400;
+        const parentStyle = getComputedStyle(canvas.parentElement!);
+        const paddingX = parseFloat(parentStyle.paddingLeft) + parseFloat(parentStyle.paddingRight);
+        const w = (canvas.parentElement?.clientWidth ?? 400) - paddingX;
         const h = 200;
         canvas.width = w * dpr;
         canvas.height = h * dpr;
-        canvas.style.width = `${w}px`;
         canvas.style.height = `${h}px`;
         ctx.scale(dpr, dpr);
         ctx.clearRect(0, 0, w, h);

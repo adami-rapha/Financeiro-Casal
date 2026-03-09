@@ -215,16 +215,24 @@ export default function App() {
     let bothInc = 0, meInc = 0, herInc = 0;
     for (const tx of items) {
       if (tx.type === "expense") {
-        if (tx.involves === "both") bothExp += tx.amount;
+        if (tx.involves === "both") {
+          bothExp += tx.amount;
+          meExp += tx.amount / 2;
+          herExp += tx.amount / 2;
+        }
         else if (tx.involves === "me") meExp += tx.amount;
         else herExp += tx.amount;
       } else if (tx.type === "income") {
-        if (tx.involves === "both") bothInc += tx.amount;
+        if (tx.involves === "both") {
+          bothInc += tx.amount;
+          meInc += tx.amount / 2;
+          herInc += tx.amount / 2;
+        }
         else if (tx.involves === "me") meInc += tx.amount;
         else herInc += tx.amount;
       }
     }
-    return { bothExp, meExp, herExp, bothInc, meInc, herInc, totalExp: bothExp + meExp + herExp };
+    return { bothExp, meExp, herExp, bothInc, meInc, herInc, totalExp: meExp + herExp };
   }, [items]);
 
   async function handleSaveTx(data: any, opts?: { keepTab?: boolean }) {
@@ -282,12 +290,12 @@ export default function App() {
   }
 
   const pageTitle =
-    page === "dash" ? "Dashboard" :
+    page === "dash" ? "Visão Geral" :
       page === "tx" ? "Lançamentos" :
         page === "reports" ? "Relatórios" : "Categorias";
 
   const navItems: { key: PageKey; icon: string; label: string }[] = [
-    { key: "dash", icon: "fa-chart-pie", label: "Dashboard" },
+    { key: "dash", icon: "fa-chart-pie", label: "Visão Geral" },
     { key: "tx", icon: "fa-receipt", label: "Lançamentos" },
     { key: "reports", icon: "fa-file-export", label: "Relatórios" },
   ];
@@ -297,8 +305,14 @@ export default function App() {
       {/* ── Sidebar ── */}
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <h1>💰 Financeiro Casal</h1>
-          <div className="sub">Controle financeiro pessoal</div>
+          <div className="brand-top">
+            <img src="./img/logo.png" alt="Logo" className="brand-logo" />
+            <div className="brand-titles">
+              <h1 className="brand-title">Financeiro</h1>
+              <h1 className="brand-title brand-title-accent">Casal</h1>
+            </div>
+          </div>
+          <div className="sub">Planejamento e união financeira</div>
         </div>
 
         <nav className="sidebar-nav">

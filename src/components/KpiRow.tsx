@@ -17,6 +17,7 @@ export default function KpiRow({ income, expense, transfer, withdraw, carryOver 
 
   return (
     <>
+      <div className="section-title"><i className="fa-solid fa-piggy-bank" /> Total</div>
       {/* Carry-over row: saldo anterior + reservas acumuladas */}
       <div className="carry-over-row">
         <div className="carry-card prev-balance">
@@ -53,6 +54,7 @@ export default function KpiRow({ income, expense, transfer, withdraw, carryOver 
         </div>
       </div>
 
+      <div className="section-title"><i className="fa-solid fa-calendar-days" /> Mês</div>
       {/* Monthly KPIs */}
       <div className="kpis">
         <div className="kpi in">
@@ -76,19 +78,6 @@ export default function KpiRow({ income, expense, transfer, withdraw, carryOver 
             <div className="kpi-icon"><i className="fa-solid fa-arrow-up" /></div>
           </div>
         </div>
-
-        <div className="kpi tr">
-          <div className="row">
-            <div>
-              <div className="k">Reservas</div>
-              <div className="v">{fmtBRL.format(transfer)}</div>
-              <div className="t">Reservas guardadas</div>
-            </div>
-            <div className="kpi-icon"><i className="fa-solid fa-right-left" /></div>
-          </div>
-        </div>
-
-
 
         <div className="kpi bal">
           <div className="row">
