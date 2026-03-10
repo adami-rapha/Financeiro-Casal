@@ -156,6 +156,10 @@ export function BarChart({ allTransactions, currentMonthKey }: BarProps) {
         const textColor = getComputedCssVar("--chart-label") || "#f1f5f9";
         const mutedColor = getComputedCssVar("--chart-label-dim") || "#64748b";
         const gridColor = getComputedCssVar("--chart-grid") || "rgba(255,255,255,.05)";
+        const incomeColor = getComputedCssVar("--income") || "#34d399";
+        const incomeMutedColor = getComputedCssVar("--income-muted") || "rgba(52,211,153,.3)";
+        const expenseColor = getComputedCssVar("--expense") || "#f87171";
+        const expenseMutedColor = getComputedCssVar("--expense-muted") || "rgba(248,113,113,.3)";
 
         const dpr = window.devicePixelRatio || 1;
         const parentStyle = getComputedStyle(canvas.parentElement!);
@@ -199,14 +203,14 @@ export function BarChart({ allTransactions, currentMonthKey }: BarProps) {
             const expH = (m.expense / maxVal) * chartH;
 
             const gradIn = ctx.createLinearGradient(0, baseY - incH, 0, baseY);
-            gradIn.addColorStop(0, "#34d399");
-            gradIn.addColorStop(1, "rgba(52,211,153,.3)");
+            gradIn.addColorStop(0, incomeColor);
+            gradIn.addColorStop(1, incomeMutedColor);
             ctx.fillStyle = gradIn;
             roundedRect(ctx, x, baseY - incH, barW, incH, 4);
 
             const gradOut = ctx.createLinearGradient(0, baseY - expH, 0, baseY);
-            gradOut.addColorStop(0, "#f87171");
-            gradOut.addColorStop(1, "rgba(248,113,113,.3)");
+            gradOut.addColorStop(0, expenseColor);
+            gradOut.addColorStop(1, expenseMutedColor);
             ctx.fillStyle = gradOut;
             roundedRect(ctx, x + barW + 4, baseY - expH, barW, expH, 4);
 
@@ -223,10 +227,10 @@ export function BarChart({ allTransactions, currentMonthKey }: BarProps) {
             <div className="chart-title">Histórico Mensal</div>
             <div className="chart-subtitle">
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6, marginRight: 16 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: "#34d399" }} /> Entradas
+                    <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--income)" }} /> Entradas
                 </span>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 2, background: "#f87171" }} /> Saídas
+                    <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--expense)" }} /> Saídas
                 </span>
             </div>
             <canvas ref={canvasRef} style={{ width: "100%", display: "block" }} />

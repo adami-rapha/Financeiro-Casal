@@ -40,23 +40,14 @@ function uniqueSortedMonths(existing: string[], include: string): string[] {
   return Array.from(set).sort();
 }
 
-function prevMonthKey(mk: string): string {
-  const [y, m] = mk.split("-").map(Number);
-  const d = new Date(y, (m - 1), 1);
-  d.setMonth(d.getMonth() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function nextMonthKey(mk: string): string {
-  const [y, m] = mk.split("-").map(Number);
-  const d = new Date(y, (m - 1), 1);
-  d.setMonth(d.getMonth() + 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
 
 export default function App() {
   const { theme, toggle: toggleTheme } = useTheme();
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
   const [page, setPage] = React.useState<PageKey>("dash");
+  const [viewMode, setViewMode] = React.useState<"couple" | "person1" | "person2">("couple");
 
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [months, setMonths] = React.useState<string[]>([]);
@@ -277,17 +268,6 @@ export default function App() {
     toast("Categoria reativada.", "success");
   }
 
-  function onPrev() {
-    const mk = prevMonthKey(monthKey);
-    setMonthKey(mk);
-    setMonths(uniqueSortedMonths(months, mk));
-  }
-
-  function onNext() {
-    const mk = nextMonthKey(monthKey);
-    setMonthKey(mk);
-    setMonths(uniqueSortedMonths(months, mk));
-  }
 
   const pageTitle =
     page === "dash" ? "Visão Geral" :
@@ -364,23 +344,230 @@ export default function App() {
 
       {/* ── Main ── */}
       <main className="main-content">
-        <div className="page-header" style={{ display: isPrinting ? "none" : "flex" }}>
-          <h2>{pageTitle}</h2>
-          <div className="page-header-right">
-            {page !== "reports" && (
+        {!isPrinting && page !== "reports" && (
+          <div className="top-bar">
+            {/* Left side: Mode Toggle */}
+            <div className="top-bar-left">
+              <div className="mode-toggle-wrapper">
+                <span className="mode-toggle-label">
+                  MODO<br />
+                  <strong>
+                    {viewMode === "couple" ? "CASAL" : viewMode === "person1" ? "ELE" : "ELA"}
+                  </strong>
+                </span>
+                <div className="mode-toggle-switch">
+                  <div
+                    className={`mode-toggle-indicator ${viewMode}`}
+                  ></div>
+                  <button
+                    className={`mode-btn ${viewMode === 'person1' ? 'active' : ''}`}
+                    onClick={() => setViewMode('person1')}
+                    title="Modo Individual (Pessoa 1)"
+                  >
+                    <i className="fa-solid fa-user mode-icon-m"></i>
+                  </button>
+                  <button
+                    className={`mode-btn ${viewMode === 'couple' ? 'active' : ''}`}
+                    onClick={() => setViewMode('couple')}
+                    title="Modo Casal"
+                  >
+                    <div className="couple-icons">
+                      <i className="fa-solid fa-user mode-icon-m"></i>
+                      <i className="fa-solid fa-user mode-icon-f" style={{ marginLeft: '-6px' }}></i>
+                    </div>
+                  </button>
+                  <button
+                    className={`mode-btn ${viewMode === 'person2' ? 'active' : ''}`}
+                    onClick={() => setViewMode('person2')}
+                    title="Modo Individual (Pessoa 2)"
+                  >
+                    <i className="fa-solid fa-user mode-icon-f"></i>
+                  </button>
+                </div>
+
+                <button
+                  className="quick-add-btn"
+                  onClick={() => setTxModalOpen(true)}
+                  title="Novo Lançamento"
+                >
+                  <i className="fa-solid fa-plus icon"></i>
+                  <span className="text">Lançamento Rápido</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Center: MonthPicker */}
+            <div className="top-bar-center">
               <MonthPicker
                 monthKey={monthKey}
                 months={months}
                 onChange={(m) => setMonthKey(m)}
-                onPrev={onPrev}
-                onNext={onNext}
               />
-            )}
-            <button className="btn primary" onClick={() => { setEditing(null); setTxModalOpen(true); }}>
-              <i className="fa-solid fa-plus" /> Novo lançamento
-            </button>
+            </div>
+
+            {/* Right side: Theme Toggle, Notifications & Profile */}
+            <div className="top-bar-right">
+
+              {/* Theme Toggle Switch */}
+              <div className="theme-toggle-switch" onClick={toggleTheme} title="Alternar Tema">
+                <div
+                  className="theme-indicator"
+                  style={{ transform: theme === 'dark' ? 'translateX(0)' : 'translateX(100%)' }}
+                />
+                <div className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}>
+                  <i className="fa-solid fa-moon"></i>
+                </div>
+                <div className={`theme-btn ${theme === 'light' ? 'active' : ''}`}>
+                  <i className="fa-solid fa-sun"></i>
+                </div>
+              </div>
+
+              <div className="notification-wrapper">
+                <button
+                  className="icon-btn icon-lg"
+                  title="Notificações"
+                  onClick={() => {
+                    const el = document.getElementById('notif-dropdown');
+                    if (el) el.classList.toggle('open');
+                  }}
+                >
+                  <i className="fa-regular fa-bell" />
+                  <span className="notification-badge"></span>
+                </button>
+
+                <div id="notif-dropdown" className="notification-dropdown">
+                  <div className="notif-header">
+                    <h4>Notificações</h4>
+                    <button
+                      className="notif-close-btn"
+                      onClick={() => {
+                        const el = document.getElementById('notif-dropdown');
+                        if (el) el.classList.remove('open');
+                      }}
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div className="notif-body">
+                    <div className="notif-item unread">
+                      <div className="notif-icon bg-income-muted text-income">
+                        <i className="fa-solid fa-arrow-down" />
+                      </div>
+                      <div className="notif-content">
+                        <p className="notif-title">Salário recebido</p>
+                        <p className="notif-desc">Seu salário de R$ 5.000,00 foi compensado.</p>
+                        <span className="notif-time">Há 2 horas</span>
+                      </div>
+                    </div>
+                    <div className="notif-item">
+                      <div className="notif-icon bg-expense-muted text-expense">
+                        <i className="fa-solid fa-file-invoice-dollar" />
+                      </div>
+                      <div className="notif-content">
+                        <p className="notif-title">Conta vencendo</p>
+                        <p className="notif-desc">A conta de Luz vence amanhã.</p>
+                        <span className="notif-time">Ontem</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="profile-wrapper" style={{ position: 'relative' }}>
+                <div
+                  className="profile-btn"
+                  title="Trocar Perfil ou Ver Opções"
+                >
+                  <div className="profile-stack" key={viewMode}>
+                    {/* Layer `pos-2` = lowest layer. Layer `pos-1` = middle layer. Layer `active` = front layer */}
+                    <div
+                      className={`profile-avatar stack-item ${viewMode === 'couple' ? 'active' : 'inactive'} ${viewMode === 'person1' ? 'pos-1' : viewMode === 'person2' ? 'pos-2' : ''}`}
+                      onClick={() => {
+                        if (viewMode === 'couple') {
+                          const el = document.getElementById('profile-dropdown');
+                          if (el) el.classList.toggle('open');
+                        } else {
+                          setViewMode('couple');
+                        }
+                      }}
+                    >
+                      <div className="profile-hover-overlay">
+                        <i className={`fa-solid ${viewMode === 'couple' ? 'fa-gear' : 'fa-rotate-right'}`}></i>
+                      </div>
+                      <div className="couple-icons">
+                        <i className="fa-solid fa-user" style={{ fontSize: '16px' }}></i>
+                        <i className="fa-solid fa-user" style={{ marginLeft: '-6px', fontSize: '16px' }}></i>
+                      </div>
+                    </div>
+                    <div
+                      className={`profile-avatar stack-item person1 ${viewMode === 'person1' ? 'active' : 'inactive'} ${viewMode === 'person2' ? 'pos-1' : viewMode === 'couple' ? 'pos-2' : ''}`}
+                      onClick={() => {
+                        if (viewMode === 'person1') {
+                          const el = document.getElementById('profile-dropdown');
+                          if (el) el.classList.toggle('open');
+                        } else {
+                          setViewMode('person1');
+                        }
+                      }}
+                    >
+                      <div className="profile-hover-overlay">
+                        <i className={`fa-solid ${viewMode === 'person1' ? 'fa-gear' : 'fa-rotate-right'}`}></i>
+                      </div>
+                      <i className="fa-solid fa-user"></i>
+                    </div>
+                    <div
+                      className={`profile-avatar stack-item person2 ${viewMode === 'person2' ? 'active' : 'inactive'} ${viewMode === 'couple' ? 'pos-1' : viewMode === 'person1' ? 'pos-2' : ''}`}
+                      onClick={() => {
+                        if (viewMode === 'person2') {
+                          const el = document.getElementById('profile-dropdown');
+                          if (el) el.classList.toggle('open');
+                        } else {
+                          setViewMode('person2');
+                        }
+                      }}
+                    >
+                      <div className="profile-hover-overlay">
+                        <i className={`fa-solid ${viewMode === 'person2' ? 'fa-gear' : 'fa-rotate-right'}`}></i>
+                      </div>
+                      <i className="fa-solid fa-user"></i>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Settings Dropdown */}
+                <div id="profile-dropdown" className="notification-dropdown profile-dropdown">
+                  <div className="notif-header">
+                    <h4>Configurações de Usuário</h4>
+                    <button
+                      className="notif-close-btn"
+                      onClick={() => {
+                        const el = document.getElementById('profile-dropdown');
+                        if (el) el.classList.remove('open');
+                      }}
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div className="notif-body">
+                    <div className="profile-menu-item">
+                      <i className="fa-solid fa-gear"></i>
+                      <span>Ajustes do Perfil</span>
+                    </div>
+                    <div className="profile-menu-item">
+                      <i className="fa-solid fa-key"></i>
+                      <span>Segurança</span>
+                    </div>
+                    <div className="profile-menu-item" style={{ color: 'var(--expense)' }}>
+                      <i className="fa-solid fa-right-from-bracket"></i>
+                      <span>Sair desta conta</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Global Filter Warning Banner */}
         {!isPrinting && page !== "reports" && (filters.type !== "all" || filters.categoryId !== "all" || filters.involves !== "all" || filters.paidBy !== "all" || filters.q.trim() !== "") && (
