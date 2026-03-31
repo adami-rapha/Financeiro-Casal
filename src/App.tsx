@@ -11,6 +11,7 @@ import RecentTxList from "./components/RecentTxList";
 import Modal from "./components/Modal";
 import Toast, { type ToastState } from "./components/Toast";
 import ReportPage from "./components/ReportPage";
+import ImportExportPage from "./components/ImportExportPage";
 import { PieChart, BarChart } from "./components/Charts";
 import { useTheme } from "./lib/ThemeContext";
 import { computeCarryOver } from "./lib/carryOver";
@@ -32,7 +33,7 @@ import {
   getActiveReserves,
 } from "./lib/repo";
 
-type PageKey = "dash" | "tx" | "cat" | "reports";
+type PageKey = "dash" | "tx" | "cat" | "reports" | "importexport";
 
 function uniqueSortedMonths(existing: string[], include: string): string[] {
   const set = new Set(existing);
@@ -272,12 +273,14 @@ export default function App() {
   const pageTitle =
     page === "dash" ? "Visão Geral" :
       page === "tx" ? "Lançamentos" :
-        page === "reports" ? "Relatórios" : "Categorias";
+        page === "reports" ? "Relatórios" :
+          page === "importexport" ? "Importar / Exportar" : "Categorias";
 
   const navItems: { key: PageKey; icon: string; label: string }[] = [
     { key: "dash", icon: "fa-chart-pie", label: "Visão Geral" },
     { key: "tx", icon: "fa-receipt", label: "Lançamentos" },
     { key: "reports", icon: "fa-file-export", label: "Relatórios" },
+    { key: "importexport", icon: "fa-arrow-right-arrow-left", label: "Importar / Exportar" },
   ];
 
   return (
@@ -711,6 +714,14 @@ export default function App() {
             onAdd={handleAddCategory}
             onArchive={handleArchiveCategory}
             onUnarchive={handleUnarchiveCategory}
+          />
+        )}
+
+        {/* ── Importar / Exportar ── */}
+        {page === "importexport" && (
+          <ImportExportPage
+            onRefresh={refreshAll}
+            toast={toast}
           />
         )}
       </main>
